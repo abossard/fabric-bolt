@@ -161,7 +161,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
 
     # 3rd Party
-    'grappelli',
+    'djangocms_admin_style',
     'django.contrib.admin',
     'south',
     'sekizai',
