@@ -7,6 +7,10 @@ Fabric Bolt
 .. image:: https://coveralls.io/repos/worthwhile/fabric-bolt/badge.png?branch=master
         :target: https://coveralls.io/r/worthwhile/fabric-bolt?branch=master
 
+
+I forked fabric-bolt to integrate a fabfile management and edit system, so that you can do administrative server tasks as well. A project can then be of a more generic nature, like: "Wordpress" and ve an atached fabfile to import, export, install or upgrade an installation.
+
+
 | **tl;dr**
 | A web interface for fabric deployments.
 
