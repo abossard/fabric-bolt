@@ -7,11 +7,11 @@ import hashlib
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
 from authtools.models import AbstractEmailUser
 
 
 class DeployUser(AbstractEmailUser):
+
     """
     Custom user class for deployments. Email as username using django-custom-user.
     """

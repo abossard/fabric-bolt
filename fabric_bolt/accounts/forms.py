@@ -55,17 +55,13 @@ class UserChangeForm(forms.ModelForm):
         Save the model instance with the correct Auth Group based on the user_level question
         """
         instance = super(UserChangeForm, self).save(commit=commit)
+        if self.cleaned_data.get('user_level', False):
+            instance.groups.clear()
+            instance.groups.add(Group.objects.get(id=self.cleaned_data['user_level']))
 
+        # Set staff status based on user group
+        instance.is_staff = instance.user_is_admin()
         if commit:
-            instance.save()
-
-            # Assign user to selected group
-            if self.cleaned_data.get('user_level', False):
-                instance.groups.clear()
-                instance.groups.add(Group.objects.get(id=self.cleaned_data['user_level']))
-
-            # Set staff status based on user group
-            instance.is_staff = instance.user_is_admin()
             instance.save()
 
         return instance
