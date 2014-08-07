@@ -62,7 +62,7 @@ class DeployUser(AbstractEmailUser):
         """
         Assumes the user is only assigned to one role and return it
         """
-        return self.group_strigify()
+        return self.group_stringify()
 
     def _get_groups(self):
         if not hasattr(self, '_cached_groups'):
@@ -84,7 +84,7 @@ class DeployUser(AbstractEmailUser):
             return False
         return "Historian" in self._get_groups()
 
-    def group_strigify(self):
+    def group_stringify(self):
         """
         Converts this user's group(s) to a string and returns it.
         """

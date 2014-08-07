@@ -1,4 +1,3 @@
-
 from django.contrib import messages
 
 from braces.views import GroupRequiredMixin
