@@ -24,7 +24,7 @@ class UserListTable(PaginateTable):
     email = tables.Column(verbose_name='Email')
     first_name = tables.Column(verbose_name='First Name')
     last_name = tables.Column(verbose_name='Last Name')
-    user_level = tables.Column(verbose_name='User Level', accessor='group_strigify', order_by='groups')
+    user_level = tables.Column(verbose_name='User Level', accessor='group_stringify', order_by='groups')
 
     class Meta:
         model = DeployUser
