@@ -48,7 +48,7 @@ def setup_virtual_env_if_needed(repo_dir):
 def update_project_requirements(project, repo_dir, activate_loc):
     pip_installs = ' '.join(project.fabfile_requirements.splitlines())
 
-    check_output_with_ssh_key('source {} && cd {};pip install {}'.format(activate_loc, repo_dir, pip_installs))
+    check_output_with_ssh_key('. {} && cd {};pip install {}'.format(activate_loc, repo_dir, pip_installs))
 
 
 def get_fabfile_path(project):
@@ -264,6 +264,6 @@ def build_command(deployment, session, abort_on_prompts=True):
     command += ' --fabfile={}'.format(fabfile_path)
 
     if active_loc:
-        return 'source {};'.format(active_loc) + ' ' + command
+        return '. {};'.format(active_loc) + ' ' + command
     else:
         return command
