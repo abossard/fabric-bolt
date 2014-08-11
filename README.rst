@@ -13,7 +13,7 @@ abossard: I forked fabric-bolt to integrate a fabfile management and edit system
 Things I plan to do
 -------------------
 
-* manage and edit fabfiles (codemirror integration): &#x2713;
+* manage and edit fabfiles (codemirror integration): unicode:: U+2713
 * assign a fabfile to a project, remove the type
   If you want to make a new Wordpress intallation, you create a project, set the
   required paths and then select the wordpress fabfile. It contains tasks
