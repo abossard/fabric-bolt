@@ -63,3 +63,4 @@ worthwhile_fabfile.py
 core.db
 .repo_caches
 .django_cache
+/env

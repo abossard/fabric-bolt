@@ -8,7 +8,16 @@ Fabric Bolt
         :target: https://coveralls.io/r/worthwhile/fabric-bolt?branch=master
 
 
-I forked fabric-bolt to integrate a fabfile management and edit system, so that you can do administrative server tasks as well. A project can then be of a more generic nature, like: "Wordpress" and ve an atached fabfile to import, export, install or upgrade an installation.
+abossard: I forked fabric-bolt to integrate a fabfile management and edit system, so that you can do administrative server tasks as well. A project can then be of a more generic nature, like: "Wordpress" and ve an atached fabfile to import, export, install or upgrade an installation.
+
+Things I plan to do
+-------------------
+
+* manage and edit fabfiles (codemirror integration)
+* assign a fabfile to a project, remove the type
+  If you want to make a new Wordpress intallation, you create a project, set the
+  required paths and then select the wordpress fabfile. It contains tasks
+  for installing, update, backup and restore wordpress
 
 
 | **tl;dr**
