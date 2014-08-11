@@ -161,7 +161,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
 
     # 3rd Party
-    'grappelli',
+    'djangocms_admin_style',
     'django.contrib.admin',
     'south',
     'sekizai',
@@ -175,6 +175,7 @@ INSTALLED_APPS = (
     'fabric_bolt.hosts',
     'fabric_bolt.launch_window',
     'fabric_bolt.projects',
+    'fabric_bolt.fabfiles',
 )
 ########## END APP CONFIGURATION
 
@@ -213,6 +214,16 @@ EMAIL_PORT = 25
 EMAIL_USE_TLS = False
 ########## END EMAIL CONFIGURATION
 
+########## CODEMIRROR CONFIGURATION
+CODEMIRROR_PATH = 'codemirror'
+CODEMIRROR_MODE = 'python'
+CODEMIRROR_THEME = 'eclipse'
+CODEMIRROR_CONFIG = {
+    'lineNumbers': True,
+    'indentUnit': 4
+}
+CODEMIRROR_JS_VAR_FORMAT = None
+########## ENDCODEMIRROR CONFIGURATION
 
 ########## LOGGING CONFIGURATION
 # A sample logging configuration. The only tangible logging
@@ -246,9 +257,16 @@ LOGGING = {
 ########## END LOGGING CONFIGURATION
 
 CACHES = {
-    'default': {
+    'file': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': os.path.join(PUBLIC_DIR, '.django_cache'),
+    },
+    'memory': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    },
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     }
 }
 
