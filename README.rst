@@ -76,4 +76,4 @@ Authors
 
 Bolting web applications to servers since 2013 :: Deploy Happy!
 
-|check| unicode:: U+2713
+.. |check| unicode:: U+2713
