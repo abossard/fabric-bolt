@@ -2,6 +2,7 @@ import django_tables2 as tables
 
 from fabric_bolt.core.mixins.tables import ActionsColumn, PaginateTable
 from fabric_bolt.hosts.models import Host
+from fabric_bolt.roles.models import Role
 from fabric_bolt.projects import models
 
 
@@ -79,6 +80,7 @@ class StageTable(PaginateTable):
     ], delimiter='&#160;&#160;&#160;')
 
     hosts = tables.Column(accessor='host_count', verbose_name='# Hosts')
+    roles = tables.Column(accessor='role_count', verbose_name='# Roles')
     deployments = tables.Column(accessor='deployment_count', verbose_name='# Deployments', order_by='deployment_count')
 
     class Meta:
@@ -87,6 +89,7 @@ class StageTable(PaginateTable):
         sequence = fields = (
             'name',
             'hosts',
+            'roles',
             'deployments',
             'actions',
         )
@@ -105,7 +108,7 @@ class DeploymentTable(PaginateTable):
     task_name = tables.Column(accessor='task.name', verbose_name='Task')
 
     #Prettify the status
-    status = tables.TemplateColumn('<span style="font-size:13px;" class="label label-{% if record.status == "success" %}success{% elif record.status == "failed" %}danger{% else %}info{% endif %}"><i class="glyphicon glyphicon-{% if record.status == "success" %}ok{% elif record.status == "failed" %}warning-sign{% else %}time{% endif %}"></i> &#160;{{ record.get_status_display }}</span>')
+    status = tables.TemplateColumn('<span style="font-size:13px;" class="label label-{% if record.status == "success" %}success{% elif record.status == "failed" %}danger{% elif record.status == "aborted" %}warning{% else %}info{% endif %}"><i class="glyphicon glyphicon-{% if record.status == "success" %}ok{% elif record.status == "failed" %}remove{% elif record.status == "aborted" %}warning-sign{% else %}time{% endif %}"></i> &#160;{{ record.get_status_display }}</span>')
 
     class Meta:
         model = models.Deployment
@@ -141,6 +144,60 @@ class StageHostTable(PaginateTable):
         model = Host
         attrs = {"class": "table table-striped"}
         exclude = ('id',)
+        sequence = fields = (
+            'name',
+            'actions'
+        )
+
+
+class StageRoleTable(PaginateTable):
+    """This table lists the Stage->Role through table records
+
+    Also provides actions to view and un-map the role to the stage
+    """
+
+    def __init__(self, *args, **kwargs):
+        stage_id = kwargs.pop('stage_id')
+
+        self.base_columns['actions'] = ActionsColumn([
+            {'title': '<i class="glyphicon glyphicon-file"></i>', 'url': 'roles_role_detail', 'args': [tables.A('pk')],
+             'attrs':{'data-toggle': 'tooltip', 'title': 'View Role', 'data-delay': '{ "show": 300, "hide": 0 }'}},
+            {'title': '<i class="glyphicon glyphicon-trash"></i>', 'url': 'projects_stage_unmaprole', 'args': [stage_id, tables.A('pk'),],
+             'attrs':{'data-toggle': 'tooltip', 'title': 'Remove Role from Stage', 'data-delay': '{ "show": 300, "hide": 0 }'}},
+        ], delimiter='&#160;&#160;&#160;')
+
+        super(StageRoleTable, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Role
+        attrs = {"class": "table table-striped"}
+        sequence = fields = (
+            'name',
+            'actions'
+        )
+
+
+class ProjectRoleTable(PaginateTable):
+    """This table lists the Project->Role through table records
+
+    Also provides actions to view and un-map the role to the project
+    """
+
+    def __init__(self, *args, **kwargs):
+        project_id = kwargs.pop('project_id')
+
+        self.base_columns['actions'] = ActionsColumn([
+            {'title': '<i class="glyphicon glyphicon-file"></i>', 'url': 'roles_role_detail', 'args': [tables.A('pk')],
+             'attrs':{'data-toggle': 'tooltip', 'title': 'View Role', 'data-delay': '{ "show": 300, "hide": 0 }'}},
+            {'title': '<i class="glyphicon glyphicon-trash"></i>', 'url': 'projects_project_unmaprole', 'args': [project_id, tables.A('pk'),],
+             'attrs':{'data-toggle': 'tooltip', 'title': 'Remove Role from Project', 'data-delay': '{ "show": 300, "hide": 0 }'}},
+        ], delimiter='&#160;&#160;&#160;')
+
+        super(ProjectRoleTable, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Role
+        attrs = {"class": "table table-striped"}
         sequence = fields = (
             'name',
             'actions'

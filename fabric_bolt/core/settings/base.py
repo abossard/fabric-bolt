@@ -113,6 +113,7 @@ GRAPPELLI_ADMIN_TITLE = 'Admin'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
+    'django.template.loaders.eggs.Loader'
 )
 
 TEMPLATE_DIRS = (
@@ -132,6 +133,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.request',
     'fabric_bolt.core.context_processors.sidebar_lists',
     'sekizai.context_processors.sekizai',
+    # 'social.apps.django_app.context_processors.backends',
+    # 'social.apps.django_app.context_processors.login_redirect',
 )
 ########## END TEMPLATE CONFIGURATION
 
@@ -169,10 +172,12 @@ INSTALLED_APPS = (
     'stronghold',
     'django_tables2',
     'bootstrapform',
+    # 'social.apps.django_app.default',
 
     # Project
     'fabric_bolt.accounts',
     'fabric_bolt.hosts',
+    'fabric_bolt.roles',
     'fabric_bolt.launch_window',
     'fabric_bolt.projects',
     'fabric_bolt.fabfiles',
@@ -205,6 +210,12 @@ CRISPY_TEMPLATE_PACK = "bootstrap3"
 ########## EMAIL CONFIGURATION
 AUTH_USER_MODEL = 'accounts.DeployUser'
 ########## END EMAIL CONFIGURATION
+
+
+# AUTHENTICATION_BACKENDS = (
+#     'social.backends.google.GoogleOAuth2',
+#     'django.contrib.auth.backends.ModelBackend'
+# )
 
 
 ########## EMAIL CONFIGURATION

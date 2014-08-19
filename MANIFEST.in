@@ -2,6 +2,7 @@ include setup.py README.rst MANIFEST.in LICENSE
 
 recursive-include fabric_bolt/accounts/templates *
 recursive-include fabric_bolt/hosts/templates *
+recursive-include fabric_bolt/roles/templates *
 recursive-include fabric_bolt/projects/templates *
 recursive-include fabric_bolt/projects/static *
 

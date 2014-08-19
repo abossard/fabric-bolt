@@ -16,7 +16,7 @@ class SchemelessURLValidator(URLValidator):
 
 class Host(models.Model):
     """Defines a Host that deployments can be made to"""
-
+    username = models.CharField(max_length=255, blank=True, null=True, help_text='Optional username')
     name = models.CharField(max_length=255, help_text='DNS name or IP address', validators=[SchemelessURLValidator()])
 
     alias = models.CharField(

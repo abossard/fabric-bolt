@@ -38,7 +38,7 @@ class UserChange(UpdateView):
     Change/Edit User view. Used in a modal window.
     """
     model = DeployUser
-    success_url = reverse_lazy('accounts_user_list', args=())
+    success_url = reverse_lazy('index', args=())
     form_class = forms.UserChangeForm
     template_name = 'accounts/deployuser_change.html'
 

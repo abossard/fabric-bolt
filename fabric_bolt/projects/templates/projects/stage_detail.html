@@ -81,6 +81,44 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4>
+                        Roles
+                        <i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-delay="{'show': 300, 'hide': 0 }"
+                            data-original-title="These are the roles that will be assigned to when running tasks for this stage."></i>
+                    </h4>
+                </div>
+
+                <div class="panel-body">
+                    {% render_table roles %}
+                </div>
+
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <a class="btn btn-default btn-sm js-add-role" href="{% url 'projects_stage_maprole' object.project.pk object.pk 'role_name' %}">
+                                <i class="glyphicon glyphicon-plus-sign"></i>
+                                Add Stage Role
+                            </a>
+
+                            <select name="stage_role" id="stage_role" class="form-control input-sm" style="width: 50%; display: inline-block;">
+                                <option value="">Select Role</option>
+                                {% for role in available_roles %}
+                                    <option value="{{ role.name }}">{{ role.name }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <span id="select_role_msg" class="text-danger" style="display: none;">Please Select Role</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>
                         Stage Configuration
                         <i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-delay="{'show': 300, 'hide': 0 }"
                             data-original-title="Configurations added here will be added to fab's env variable and will override whatever is in the project configuration."></i>
@@ -147,6 +185,22 @@
                         }
 
                         location.href = link.attr('href').replace('host_id', host);
+                    });
+
+                    $('.js-add-role').click(function(event){
+                        event.preventDefault();
+
+                        var link = $(this)
+                        , role = $('#stage_role').val();
+
+                        if(role===''){
+                            $('#select_role_msg').show();
+                            return false;
+                        }else{
+                            $('#select_role_msg').hide();
+                        }
+
+                        location.href = link.attr('href').replace('role_name', role);
                     });
                 });
             }(jQuery));

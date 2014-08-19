@@ -21,6 +21,7 @@ class ProjectCreateForm(forms.ModelForm):
             'description',
             'use_repo_fabfile',
             'repo_url',
+            'task_regex',
             'fabfile_requirements',
         ]
 
@@ -30,6 +31,7 @@ class ProjectCreateForm(forms.ModelForm):
             'name',
             'type',
             'description',
+            'task_regex',
             'use_repo_fabfile',
             'repo_url',
             'fabfile_requirements',

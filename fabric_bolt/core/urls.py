@@ -10,13 +10,15 @@ socketio.sdjango.autodiscover()
 
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(r'^grappelli/', include('grappelli.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('fabric_bolt.accounts.urls')),
     url(r'^$', views.Dashboard.as_view(), name='index'),
     url(r'^hosts/', include('fabric_bolt.hosts.urls')),
-    url(r'^q/', include('fabric_bolt.launch_window.urls')),
+    url(r'^roles/', include('fabric_bolt.roles.urls')),
+    url(r'^launch-window/', include('fabric_bolt.launch_window.urls')),
     url(r'^projects/', include('fabric_bolt.projects.urls')),
     url("^socket\.io", include(socketio.sdjango.urls)),
 )

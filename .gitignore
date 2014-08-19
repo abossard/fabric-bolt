@@ -65,3 +65,6 @@ core.db
 .repo_caches
 .django_cache
 /env
+build
+dist
+fabric_bolt.egg-info

@@ -38,23 +38,27 @@
         <div class="col-md-6">
             <div class="well">
                 <fieldset style="text-align: center;margin-bottom:10px;" id="status_section">
-                    {% if object.status == object.PENDING %}
+                    {% if object.in_progress %}
                         <legend>Status: Working</legend>
                         <i class="glyphicon glyphicon-time text-info" style="font-size:90px;"></i>
                     {% elif object.status == object.SUCCESS %}
                         <legend>Status: Success!</legend>
                         <i class="glyphicon glyphicon-ok text-success" style="font-size:90px;"></i>
+                    {% elif object.status == object.ABORTED %}
+                        <legend>Status: Aborted!</legend>
+                        <i class="glyphicon glyphicon-warning-sign text-warning" style="font-size:90px;"></i>
                     {% else %}
                         <legend>Status: Failed!</legend>
-                        <i class="glyphicon glyphicon-warning-sign text-danger" style="font-size:90px;"></i>
+                        <i class="glyphicon glyphicon-remove text-danger" style="font-size:90px;"></i>
                     {% endif %}
                 </fieldset>
             </div>
         </div>
     </div>
-    <div class="well">
+    <div id="deployment_well" class="well">
+      <a id="deployment_maximize" class="btn btn-primary">Maximize</a>
         {% block output %}
-            {% if object.status == object.PENDING %}
+            {% if object.in_progress %}
                 <iframe src="{% url 'projects_deployment_output' object.pk %}" id="deployment_output"></iframe>
             {% else %}
                 <div id="deployment_output"><pre class="prettyprint">{{ object.output }}</pre></div>
@@ -62,12 +66,18 @@
         {% endblock %}
     </div>
 
+    {% if object.output %}
+    <div id="deployment_text" style="display: none;">
+      {{ object.output }}
+    </div>
+    {% endif %}
 
     {% addtoblock "js" %}
         <script>
-            var deployment_pending = {% if object.status == object.PENDING %}true{% else %}false{% endif %};
+            var deployment_in_progress = {% if object.in_progress %}true{% else %}false{% endif %};
             var deployment_id = {{ object.pk }};
-         </script>
+        </script>
+        <script src= "{% static 'projects/js/maximize_output.js' %}"></script>
         {% block deployment_scripts %}
             <script src="{% static 'projects/js/deployment.js' %}"></script>
         {% endblock %}

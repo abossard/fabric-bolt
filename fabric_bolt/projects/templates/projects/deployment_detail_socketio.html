@@ -2,7 +2,8 @@
 {% load staticfiles %}
 
 {% block output %}
-    {% if object.status == object.PENDING %}
+    {% if object.in_progress %}
+        <a id="deployment_abort" class="btn btn-danger">Abort</a>
         <div id="deployment_output"><pre class="prettyprint"></pre></div>
         <input type="text" class="form-control" id="deployment_input">
     {% else %}

@@ -6,6 +6,7 @@ from django.conf import settings
 from fabric_bolt.core.mixins.models import TrackingFields
 from fabric_bolt.projects.model_managers import ActiveManager, ActiveDeploymentManager
 
+from re import compile as compile_regex
 
 class ProjectType(TrackingFields):
     name = models.CharField(max_length=255)
@@ -28,11 +29,21 @@ class Project(TrackingFields):
     repo_url = models.CharField(max_length=200, null=True, blank=True, help_text='Currently only git repos are supported.')
     fabfile_requirements = models.TextField(null=True, blank=True, help_text='Pip requirements to install for fabfile. '
                                                                              'Enter one requirement per line.')
+    task_regex = models.CharField(max_length=1000, null=True, blank=True,
+                                  help_text='Regex to select tasks to display for this project')
+
+    roles = models.ManyToManyField('roles.Role')
 
     # Managers
     objects = models.Manager()
     active_records = ActiveManager()
     # End Managers
+
+    def displayed_tasks(self, all_tasks):
+        if not self.task_regex:
+            return all_tasks
+        task_re = compile_regex(self.task_regex)
+        return filter(lambda t: task_re.match(t), all_tasks)
 
     def project_configurations(self):
         return Configuration.objects.filter(project_id=self.pk, stage__isnull=True)
@@ -61,6 +72,8 @@ class Stage(TrackingFields):
     project = models.ForeignKey(Project)
     name = models.CharField(max_length=255)
     hosts = models.ManyToManyField('hosts.Host')
+
+    roles = models.ManyToManyField('roles.Role')
 
     # Managers
     objects = models.Manager()
@@ -244,17 +257,22 @@ class Deployment(TrackingFields):
     """
 
     PENDING = 'pending'
-    FAILED = 'failed'
+    RUNNING = 'running'
+    FAILED  = 'failed'
     SUCCESS = 'success'
+    ABORTED = 'aborted'
 
-    STATUS = [(PENDING, 'Pending'), (FAILED, 'Failed'), (SUCCESS, 'Success')]
+    STATUS = [(PENDING, 'Pending'), (FAILED, 'Failed'),
+              (SUCCESS, 'Success'), (ABORTED, 'Aborted'),
+              (RUNNING, 'Running')]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     stage = models.ForeignKey(Stage)
-    comments = models.TextField()
+    comments = models.TextField(blank=True)
     status = models.CharField(choices=STATUS, max_length=10, default=PENDING)
     output = models.TextField(null=True, blank=True)
     task = models.ForeignKey('projects.Task')
+    pid = models.CharField(max_length=6, null=True)
     configuration = models.TextField(null=True, blank=True)
 
     # Managers
@@ -264,6 +282,10 @@ class Deployment(TrackingFields):
 
     class Meta:
         ordering = ['-date_created']
+
+    @property
+    def in_progress(self):
+        return self.status in [self.PENDING, self.RUNNING]
 
     def __unicode__(self):
         return u'Deployment at {} status: {}'.format(self.date_created, self.get_status_display())

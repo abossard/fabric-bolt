@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load render_table from django_tables2 %}
+{% load sekizai_tags staticfiles %}
 
 {% block breadcrumb %}
     <ol class="breadcrumb">
@@ -84,6 +85,44 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4>
+                        Roles
+                        <i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-delay="{'show': 300, 'hide': 0 }"
+                            data-original-title="These are the roles that will be assigned to when running tasks for any stage in this project."></i>
+                    </h4>
+                </div>
+
+                <div class="panel-body">
+                    {% render_table roles %}
+                </div>
+
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <a class="btn btn-default btn-sm js-add-role" href="{% url 'projects_project_maprole' object.pk 'role_name' %}">
+                                <i class="glyphicon glyphicon-plus-sign"></i>
+                                Add Project Role
+                            </a>
+
+                            <select name="project_role" id="project_role" class="form-control input-sm" style="width: 50%; display: inline-block;">
+                                <option value="">Select Role</option>
+                                {% for role in available_roles %}
+                                    <option value="{{ role.name }}">{{ role.name }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <span id="select_role_msg" class="text-danger" style="display: none;">Please Select Role</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>
                         Stages
                         <i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-delay="{ 'show': 300, 'hide': 0 }"
                            data-original-title="Stages allow you to configure hosts and custom configurations. You will deploy to a stage."></i>
@@ -122,5 +161,29 @@
             </div>
         </div>
     </div>
+
+    {% addtoblock "js" %}
+  <script>
+  (function($){
+    $(function(){
+      $('.js-add-role').click(function(event){
+        event.preventDefault();
+
+        var link = $(this)
+        , role = $('#project_role').val();
+
+        if(role===''){
+          $('#select_role_msg').show();
+          return false;
+        }else{
+          $('#select_role_msg').hide();
+        }
+
+        location.href = link.attr('href').replace('role_name', role);
+      });
+    });
+  }(jQuery));
+  </script>
+    {% endaddtoblock %}
 
 {% endblock content %}

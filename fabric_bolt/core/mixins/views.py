@@ -4,6 +4,7 @@ from braces.views import GroupRequiredMixin
 
 
 class MultipleGroupRequiredMixin(GroupRequiredMixin):
+    raise_exception = True
 
     def check_membership(self, group):
         """ Check required group(s) """

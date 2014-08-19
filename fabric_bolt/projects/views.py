@@ -18,8 +18,9 @@ from django.core.cache import cache
 
 from django_tables2 import RequestConfig, SingleTableView
 
-from fabric_bolt.core.mixins.views import MultipleGroupRequiredMixin
+# from fabric_bolt.core.mixins.views import MultipleGroupRequiredMixin
 from fabric_bolt.hosts.models import Host
+from fabric_bolt.roles.models import Role
 from fabric_bolt.projects import forms, tables, models
 from fabric_bolt.projects.util import get_fabric_tasks, build_command, get_task_details
 
@@ -48,7 +49,7 @@ class ProjectList(SingleTableView):
     queryset = models.Project.active_records.all()
 
 
-class ProjectCreate(MultipleGroupRequiredMixin, CreateView):
+class ProjectCreate(CreateView):
     """
     Create a new project
     """
@@ -91,6 +92,15 @@ class ProjectDetail(DetailView):
         stages = self.object.get_stages().annotate(deployment_count=Count('deployment'))
         context['stages'] = stages
 
+        # Roles Table (Project->Role Through table)
+        project_roles = self.object.roles.all()
+
+        role_table = tables.ProjectRoleTable(project_roles, project_id=self.object.pk)
+        RequestConfig(self.request).configure(role_table)
+        context['roles'] = role_table
+
+        context['available_roles'] = Role.objects.exclude(name__in=[role.name for role in project_roles]).all()
+
         stage_table = tables.StageTable(stages, prefix='stage_')
         RequestConfig(self.request).configure(stage_table)
         context['stage_table'] = stage_table
@@ -102,7 +112,7 @@ class ProjectDetail(DetailView):
         return context
 
 
-class ProjectUpdate(MultipleGroupRequiredMixin, UpdateView):
+class ProjectUpdate(UpdateView):
     """
     Update a project
     """
@@ -113,7 +123,7 @@ class ProjectUpdate(MultipleGroupRequiredMixin, UpdateView):
     success_url = reverse_lazy('projects_project_list')
 
 
-class ProjectDelete(MultipleGroupRequiredMixin, DeleteView):
+class ProjectDelete(DeleteView):
     """
     Deletes a project by setting the Project's date_deleted. We save projects for historical tracking.
     """
@@ -129,7 +139,7 @@ class ProjectDelete(MultipleGroupRequiredMixin, DeleteView):
         return HttpResponseRedirect(reverse('projects_project_list'))
 
 
-class ProjectConfigurationCreate(MultipleGroupRequiredMixin, BaseGetProjectCreateView):
+class ProjectConfigurationCreate(BaseGetProjectCreateView):
     """
     Create a Project Configuration. These are used to set the Fabric env object for a task.
     """
@@ -164,7 +174,7 @@ class ProjectConfigurationCreate(MultipleGroupRequiredMixin, BaseGetProjectCreat
         return success_url
 
 
-class ProjectConfigurationUpdate(MultipleGroupRequiredMixin, UpdateView):
+class ProjectConfigurationUpdate(UpdateView):
     """
     Update a Project Configuration
     """
@@ -174,7 +184,7 @@ class ProjectConfigurationUpdate(MultipleGroupRequiredMixin, UpdateView):
     form_class = forms.ConfigurationUpdateForm
 
 
-class ProjectConfigurationDelete(MultipleGroupRequiredMixin, DeleteView):
+class ProjectConfigurationDelete(DeleteView):
     """
     Delete a project configuration from a project
     """
@@ -187,7 +197,6 @@ class ProjectConfigurationDelete(MultipleGroupRequiredMixin, DeleteView):
 
     def get_success_url(self):
         """Get the url depending on what type of configuration I deleted."""
-        
         if self.stage_id:
             url = reverse('projects_stage_view', args=(self.project_id, self.stage_id))
         else:
@@ -207,7 +216,7 @@ class ProjectConfigurationDelete(MultipleGroupRequiredMixin, DeleteView):
         return super(ProjectConfigurationDelete, self).delete(self, request, *args, **kwargs)
 
 
-class DeploymentCreate(MultipleGroupRequiredMixin, CreateView):
+class DeploymentCreate(CreateView):
     """
     Form to create a new Deployment for a Project Stage. POST will kick off the DeploymentOutputStream view.
     """
@@ -225,8 +234,7 @@ class DeploymentCreate(MultipleGroupRequiredMixin, CreateView):
             messages.error(self.request, '"{}" is not a valid task.'. format(self.kwargs['task_name']))
             return HttpResponseRedirect(reverse('projects_stage_view', kwargs={'project_id': self.stage.project_id, 'pk': self.stage.pk }))
 
-        self.task_name = task_details[0]
-        self.task_description = task_details[1]
+        self.task_name, self.task_description, self.task_args = task_details
 
         return super(DeploymentCreate, self).dispatch(request, *args, **kwargs)
 
@@ -254,7 +262,7 @@ class DeploymentCreate(MultipleGroupRequiredMixin, CreateView):
                 field = CharField()
 
                 if config.sensitive_value:
-                    field.widget = PasswordInput
+                    field.widget = PasswordInput(attrs={'class' : 'password'})
 
                 if config.task_argument:
                     used_arg_names.append(config.key)
@@ -263,20 +271,21 @@ class DeploymentCreate(MultipleGroupRequiredMixin, CreateView):
             form.fields[str_config_key] = field
             form.helper.layout.fields.insert(len(form.helper.layout.fields)-1, str_config_key)
 
-        task_details = get_task_details(self.stage.project, self.task_name)
-
-        for arg in task_details[2]:
+        for arg in self.task_args:
             if isinstance(arg, tuple):
                 name, default = arg
+                required = False
             else:
                 name, default = arg, None
+                required = True
 
             if name in used_arg_names:
                 continue
 
             str_config_key = 'configuration_value_for_{}'.format(name)
 
-            field = CharField(label='Argument value for ' + name, initial=default)
+            field = CharField(label='Argument value for ' + name, initial=default,
+                              required=required)
 
             form.fields[str_config_key] = field
             form.helper.layout.fields.insert(len(form.helper.layout.fields)-1, str_config_key)
@@ -316,6 +325,7 @@ class DeploymentCreate(MultipleGroupRequiredMixin, CreateView):
         context['stage'] = self.stage
         context['task_name'] = self.task_name
         context['task_description'] = self.task_description
+
         return context
 
     def get_success_url(self):
@@ -381,7 +391,7 @@ class DeploymentOutputStream(View):
         return resp
 
 
-class ProjectStageCreate(MultipleGroupRequiredMixin, BaseGetProjectCreateView):
+class ProjectStageCreate(BaseGetProjectCreateView):
     """
     Create/Add a Stage to a Project
     """
@@ -403,7 +413,7 @@ class ProjectStageCreate(MultipleGroupRequiredMixin, BaseGetProjectCreateView):
         return super(ProjectStageCreate, self).form_valid(form)
 
 
-class ProjectStageUpdate(MultipleGroupRequiredMixin, UpdateView):
+class ProjectStageUpdate(UpdateView):
     """
     Project Stage Update form
     """
@@ -427,11 +437,20 @@ class ProjectStageView(DetailView):
         # Hosts Table (Stage->Host Through table)
         stage_hosts = self.object.hosts.all()
 
+        # Roles Table (Stage->Host Through table)
+        stage_roles = self.object.roles.all()
+
         host_table = tables.StageHostTable(stage_hosts, stage_id=self.object.pk)  # Through table
         RequestConfig(self.request).configure(host_table)
         context['hosts'] = host_table
 
+        role_table = tables.StageRoleTable(stage_roles, stage_id=self.object.pk)  # Through table
+        RequestConfig(self.request).configure(role_table)
+        context['roles'] = role_table
+
         context['available_hosts'] = Host.objects.exclude(id__in=[host.pk for host in stage_hosts]).all()
+
+        context['available_roles'] = Role.objects.exclude(name__in=[role.name for role in stage_roles]).all()
 
         # Configuration Table
         configuration_table = tables.ConfigurationTable(self.object.stage_configurations())
@@ -453,18 +472,19 @@ class ProjectStageTasksAjax(DetailView):
     def get_context_data(self, **kwargs):
         context = super(ProjectStageTasksAjax, self).get_context_data(**kwargs)
 
-        all_tasks = get_fabric_tasks(self.object.project)
+        all_tasks = get_fabric_tasks(self.object.project,
+                                     self.object.project.task_regex)
         task_names = [x[0] for x in all_tasks]
 
         context['all_tasks'] = task_names
         context['frequent_tasks_run'] = models.Task.objects.filter(
             name__in=task_names
-        ).order_by('-times_used')[:3]
+        ).order_by('-times_used')[:5]
 
         return context
 
 
-class ProjectStageDelete(MultipleGroupRequiredMixin, DeleteView):
+class ProjectStageDelete(DeleteView):
     """
     Delete a project stage
     """
@@ -480,7 +500,7 @@ class ProjectStageDelete(MultipleGroupRequiredMixin, DeleteView):
         return HttpResponseRedirect(reverse('projects_project_view', args=(self.object.project.pk,)))
 
 
-class ProjectStageMapHost(MultipleGroupRequiredMixin, RedirectView):
+class ProjectStageMapHost(RedirectView):
     """
     Map a Project Stage to a Host
     """
@@ -500,8 +520,47 @@ class ProjectStageMapHost(MultipleGroupRequiredMixin, RedirectView):
     def get_redirect_url(self, **kwargs):
         return reverse('projects_stage_view', args=(self.project_id, self.stage_id,))
 
+class ProjectStageMapRole(RedirectView):
+    """
+    Map a Project Stage to a Role
+    """
+    group_required = ['Admin',]
+    permanent = False
 
-class ProjectStageUnmapHost(MultipleGroupRequiredMixin, RedirectView):
+    def get(self, request, *args, **kwargs):
+        self.project_id = kwargs.get('project_id')
+        self.stage_id = kwargs.get('pk')
+        role_name = kwargs.get('role_name')
+
+        stage = models.Stage.objects.get(pk=self.stage_id)
+        stage.roles.add(Role.objects.get(name=role_name))
+
+        return super(ProjectStageMapRole, self).get(request, *args, **kwargs)
+
+    def get_redirect_url(self, **kwargs):
+        return reverse('projects_stage_view', args=(self.project_id, self.stage_id,))
+
+class ProjectMapRole(RedirectView):
+    """
+    Map a Project to a Role
+    """
+    group_required = ['Admin',]
+    permanent = False
+
+    def get(self, request, *args, **kwargs):
+        self.project_id = kwargs.get('pk')
+        role_name = kwargs.get('role_name')
+
+        project = models.Project.objects.get(pk=self.project_id)
+        project.roles.add(Role.objects.get(name=role_name))
+
+        return super(ProjectMapRole, self).get(request, *args, **kwargs)
+
+    def get_redirect_url(self, **kwargs):
+        return reverse('projects_project_view', args=(self.project_id,))
+
+
+class ProjectStageUnmapHost(RedirectView):
     """
     Unmap a Project Stage from a Host (deletes the Stage->Host through table record)
     """
@@ -520,6 +579,46 @@ class ProjectStageUnmapHost(MultipleGroupRequiredMixin, RedirectView):
 
     def get_redirect_url(self, **kwargs):
         return reverse('projects_stage_view', args=(self.stage.project.pk, self.stage_id,))
+
+class ProjectStageUnmapRole(RedirectView):
+    """
+    Unmap a Project Stage from a Role (deletes the Stage->Role through table record)
+    """
+    group_required = ['Admin', ]
+    permanent = False
+
+    def get(self, request, *args, **kwargs):
+        self.stage_id = kwargs.get('pk')
+        role_name = kwargs.get('role_name')
+
+        self.stage = models.Stage.objects.get(pk=self.stage_id)
+        role = Role.objects.get(name=role_name)
+        self.stage.roles.remove(role)
+
+        return super(ProjectStageUnmapRole, self).get(request, *args, **kwargs)
+
+    def get_redirect_url(self, **kwargs):
+        return reverse('projects_stage_view', args=(self.stage.project.pk, self.stage_id,))
+
+class ProjectUnmapRole(RedirectView):
+    """
+    Unmap a Project from a Role (deletes the Project->Role through table record)
+    """
+    group_required = ['Admin', ]
+    permanent = False
+
+    def get(self, request, *args, **kwargs):
+        self.project_id = kwargs.get('pk')
+        role_name = kwargs.get('role_name')
+
+        self.project = models.Project.objects.get(pk=self.project_id)
+        role = Role.objects.get(name=role_name)
+        self.project.roles.remove(role)
+
+        return super(ProjectUnmapRole, self).get(request, *args, **kwargs)
+
+    def get_redirect_url(self, **kwargs):
+        return reverse('projects_project_view', args=(self.project.pk,))
 
 
 class ProjectInvalidateCache(RedirectView):
