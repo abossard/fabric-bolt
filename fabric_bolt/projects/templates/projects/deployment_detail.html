@@ -58,8 +58,8 @@
     <div id="deployment_well" class="well">
       <a id="deployment_maximize" class="btn btn-primary">Maximize</a>
         {% block output %}
-            {% if object.in_progress %}
-                <iframe src="{% url 'projects_deployment_output' object.pk %}" id="deployment_output"></iframe>
+            {% if object.status == object.PENDING %}
+                <iframe src="{% url 'projects_deployment_output' object.stage.project_id object.stage_id object.pk %}" id="deployment_output"></iframe>
             {% else %}
                 <div id="deployment_output"><pre class="prettyprint">{{ object.output }}</pre></div>
             {% endif %}

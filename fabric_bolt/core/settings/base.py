@@ -173,7 +173,8 @@ INSTALLED_APPS = (
     'django_tables2',
     'bootstrapform',
     # 'social.apps.django_app.default',
-
+    'graphos',
+    'django_activeurl',
     # Project
     'fabric_bolt.accounts',
     'fabric_bolt.hosts',
