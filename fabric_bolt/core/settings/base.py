@@ -182,6 +182,7 @@ INSTALLED_APPS = (
     'fabric_bolt.launch_window',
     'fabric_bolt.projects',
     'fabric_bolt.fabfiles',
+    'fabric_bolt.web_hooks',
 )
 ########## END APP CONFIGURATION
 
