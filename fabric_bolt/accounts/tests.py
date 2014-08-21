@@ -77,20 +77,20 @@ class ModelsTest(TestCase):
 
         self.assertTrue(user.user_is_historian())
 
-    def test_user_group_strigify(self):
+    def test_user_group_stringify(self):
         user = mommy.make(DeployUser)
 
-        self.assertEqual(user.group_strigify(), '')
+        self.assertEqual(user.group_stringify(), '')
 
         user.groups.add(mommy.make(Group, name='junk-group'))
         delattr(user, '_cached_groups')
 
-        self.assertEqual(user.group_strigify(), 'junk-group')
+        self.assertEqual(user.group_stringify(), 'junk-group')
 
         user.groups.add(mommy.make(Group, name='New-Admin'))
         delattr(user, '_cached_groups')
 
-        self.assertEqual(user.group_strigify(), 'junk-group/New-Admin')
+        self.assertEqual(user.group_stringify(), 'junk-group/New-Admin')
 
     def test_user_gravatar(self):
         user = mommy.make(DeployUser, email='email@example.com')

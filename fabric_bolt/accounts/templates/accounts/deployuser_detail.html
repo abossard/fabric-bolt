@@ -18,7 +18,7 @@
                     <dt>Status</dt>
                     <dd>{{ object.is_active|yesno:"Active,Disabled" }}</dd>
                     <dt>User Level</dt>
-                    <dd>{{ object.group_strigify }}</dd>
+                    <dd>{{ object.group_stringify }}</dd>
                     <dt>Theme</dt>
                     <dd>{{ object.template|default:"Default" }}</dd>
                     <dt>Last Sign In</dt>
@@ -30,8 +30,8 @@
             <div class="well">
                 <fieldset>
                     <legend>Recent Deployments</legend>
-                    {% for deployement in object.deployment_set.all %}
-                        <p>{{ deployement.stage.project }} - {{ deployement.stage }}</p>
+                    {% for deployment in object.deployment_set.all %}
+                        <p>{{ deployment.stage.project }} - {{ deployment.stage }}</p>
                     {% empty %}
                         <p>No deployments.</p>
                     {% endfor %}

@@ -19,6 +19,7 @@ urlpatterns = patterns(
     url(r'^roles/', include('fabric_bolt.roles.urls')),
     url(r'^web-hooks/', include('fabric_bolt.web_hooks.urls')),
     url(r'^launch-window/', include('fabric_bolt.launch_window.urls')),
+    url(r'^fabfiles/', include('fabric_bolt.fabfiles.urls')),
     url(r'^projects/', include('fabric_bolt.projects.urls')),
     url("^socket\.io", include(socketio.sdjango.urls)),
 )
