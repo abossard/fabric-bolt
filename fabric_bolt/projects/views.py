@@ -509,11 +509,11 @@ class ProjectStageView(ProjectSubPageMixin, DetailView):
         # Roles Table (Stage->Host Through table)
         stage_roles = self.object.roles.all()
 
-        host_table = tables.StageHostTable(stage_hosts, stage_id=self.object.pk)  # Through table
+        host_table = tables.StageHostTable(stage_hosts, stage_id=self.object.pk, project_id=self.project.pk)  # Through table
         RequestConfig(self.request).configure(host_table)
         context['hosts'] = host_table
 
-        role_table = tables.StageRoleTable(stage_roles, stage_id=self.object.pk)  # Through table
+        role_table = tables.StageRoleTable(stage_roles, stage_id=self.object.pk, project_id=self.project.pk)  # Through table
         RequestConfig(self.request).configure(role_table)
         context['roles'] = role_table
 
