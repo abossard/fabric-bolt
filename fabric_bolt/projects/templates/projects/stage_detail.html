@@ -1,15 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'projects/stage_base.html' %}
 {% load render_table from django_tables2 %}
 {% load sekizai_tags staticfiles %}
-
-{% block breadcrumb %}
-    <ol class="breadcrumb">
-        <li><a href="{% url 'projects_project_list' %}">Projects</a></li>
-        <li><a href="{% url 'projects_project_view' object.project.pk %}">{{ object.project.name }}</a></li>
-        <li><a href="{% url 'projects_project_view' object.project.pk %}">Stages</a></li>
-        <li class="active">{{ object.name }}</li>
-    </ol>
-{% endblock breadcrumb %}
 
 {% block content %}
 
@@ -76,88 +67,6 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>
-                        Roles
-                        <i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-delay="{'show': 300, 'hide': 0 }"
-                            data-original-title="These are the roles that will be assigned to when running tasks for this stage."></i>
-                    </h4>
-                </div>
-
-                <div class="panel-body">
-                    {% render_table roles %}
-                </div>
-
-                <div class="panel-footer">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <a class="btn btn-default btn-sm js-add-role" href="{% url 'projects_stage_maprole' object.project.pk object.pk 'role_name' %}">
-                                <i class="glyphicon glyphicon-plus-sign"></i>
-                                Add Stage Role
-                            </a>
-
-                            <select name="stage_role" id="stage_role" class="form-control input-sm" style="width: 50%; display: inline-block;">
-                                <option value="">Select Role</option>
-                                {% for role in available_roles %}
-                                    <option value="{{ role.name }}">{{ role.name }}</option>
-                                {% endfor %}
-                            </select>
-
-                            <span id="select_role_msg" class="text-danger" style="display: none;">Please Select Role</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>
-                        Stage Configuration
-                        <i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-delay="{'show': 300, 'hide': 0 }"
-                            data-original-title="Configurations added here will be added to fab's env variable and will override whatever is in the project configuration."></i>
-                    </h4>
-                </div>
-
-                <div class="panel-body">
-                    {% render_table configurations %}
-                </div>
-
-                <div class="panel-footer">
-                    <a class="btn btn-default btn-sm" href="{% url 'projects_configuration_stage_create' object.project.pk object.pk %}">
-                        <i class="glyphicon glyphicon-plus-sign"></i>
-                        Add Stage Configuration
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h4>
-                        Recent Deployments
-                        <i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-delay="{ 'show': 300, 'hide': 0 }"
-                           data-original-title="See what was shipped out when, and the status of each attempt."></i>
-                    </h4>
-                </div>
-
-                <div class="panel-body">
-                    {% render_table deployment_table %}
-                </div>
-
-            </div>
-        </div>
-    </div>
-
     {% addtoblock "js" %}
         <script>
             (function($){
@@ -186,25 +95,4 @@
 
                         location.href = link.attr('href').replace('host_id', host);
                     });
-
-                    $('.js-add-role').click(function(event){
-                        event.preventDefault();
-
-                        var link = $(this)
-                        , role = $('#stage_role').val();
-
-                        if(role===''){
-                            $('#select_role_msg').show();
-                            return false;
-                        }else{
-                            $('#select_role_msg').hide();
-                        }
-
-                        location.href = link.attr('href').replace('role_name', role);
-                    });
-                });
-            }(jQuery));
-        </script>
-    {% endaddtoblock %}
-
 {% endblock content %}
