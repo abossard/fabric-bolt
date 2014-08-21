@@ -24,15 +24,8 @@ from fabric_bolt.roles.models import Role
 from fabric_bolt.projects import forms, tables, models
 from fabric_bolt.projects.util import get_fabric_tasks, build_command, get_task_details
 from fabric_bolt.web_hooks.tables import HookTable
-from fabric_bolt.web_hooks.models import Hook
 
-from .signals import deployment_finished
-from django.dispatch import receiver
-
-@receiver(deployment_finished)
-def my_callback(sender, **kwargs):
-    print("Request finished!")
-
+from fabric_bolt.projects.signals import deployment_finished
 
 
 class ProjectSubPageMixin(object):
@@ -135,7 +128,7 @@ class ProjectDetail(DetailView):
         RequestConfig(self.request).configure(deployment_table)
         context['deployment_table'] = deployment_table
 
-        hook_table = HookTable(Hook.objects.filter(project=self.object))
+        hook_table = HookTable(self.object.web_hooks(False))
         RequestConfig(self.request).configure(hook_table)
         context['hook_table'] = hook_table
 
@@ -436,6 +429,8 @@ class DeploymentOutputStream(StageSubPageMixin, View):
 
             self.object.output = all_output
             self.object.save()
+
+            deployment_finished.send(self.object, deployment_id=self.object.pk)
 
         except Exception as e:
             message = "An error occurred: " + e.message
