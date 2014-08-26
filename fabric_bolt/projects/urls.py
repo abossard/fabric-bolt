@@ -12,7 +12,7 @@ urlpatterns = patterns(
     url(r'^(?P<pk>\w+)/update/$', views.ProjectUpdate.as_view(), name='projects_project_update'),
     url(r'^(?P<pk>\w+)/delete/$', views.ProjectDelete.as_view(), name='projects_project_delete'),
     url(r'^(?P<pk>\w+)/invalidate-cache/$', views.ProjectInvalidateCache.as_view(), name='projects_project_invalidate_cache'),
-
+    url(r'^(?P<pk>\w+)/copy/$', views.ProjectCopy.as_view(), name='projects_project_copy'),
     url(r'^(?P<project_id>\w+)/configuration/$', views.ProjectConfigurationList.as_view(), name='projects_configuration_list'),
     url(r'^(?P<project_id>\w+)/configuration/create/$', views.ProjectConfigurationCreate.as_view(), name='projects_configuration_create'),
     url(r'^(?P<project_id>\w+)/stage/(?P<stage_id>\d+)/configuration/create/$', views.ProjectConfigurationCreate.as_view(), name='projects_configuration_stage_create'),
