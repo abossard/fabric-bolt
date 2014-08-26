@@ -34,9 +34,6 @@ class Project(TrackingFields):
                                                                              'Enter one requirement per line.')
     task_regex = models.CharField(max_length=1000, null=True, blank=True,
                                   help_text='Regex to select tasks to display for this project')
-
-    roles = models.ManyToManyField('roles.Role')
-
     # Managers
     objects = models.Manager()
     active_records = ActiveManager()
@@ -87,8 +84,6 @@ class Stage(TrackingFields):
     project = models.ForeignKey(Project)
     name = models.CharField(max_length=255)
     hosts = models.ManyToManyField('hosts.Host')
-
-    roles = models.ManyToManyField('roles.Role')
 
     # Managers
     objects = models.Manager()

@@ -94,23 +94,7 @@
                         }
 
                         location.href = link.attr('href').replace('host_id', host);
-                                            });
-
-                    $('.js-add-role').click(function(event){
-                        event.preventDefault();
-
-                        var link = $(this)
-                        , role = $('#stage_role').val();
-
-                        if(role===''){
-                            $('#select_role_msg').show();
-                            return false;
-                        }else{
-                            $('#select_role_msg').hide();
-                        }
-
-                        location.href = link.attr('href').replace('role_name', role);
-                    });
+             });
                 });
             }(jQuery));
         </script>

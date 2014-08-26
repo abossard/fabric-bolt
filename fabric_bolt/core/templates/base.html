@@ -31,19 +31,6 @@
                 </div>
             </div>
 
-            <div class="panel panel-default">
-                <div class="panel-heading"><a href="{% url 'roles_role_list' %}">Roles</a></div>
-                <div class="panel-body">
-                    {% for role in sidebar_roles %}
-                    <a href="{% url 'roles_role_detail' role.pk %}">{{ role.name }}</a><br/>
-                    {% empty %}
-                    No Roles<br/>
-                    {% endfor %}
-                    <br/><a href="{% url 'roles_role_create' %}" class="btn btn-default btn-sm"><i
-                        class="glyphicon glyphicon-plus-sign"></i> Add Role</a>
-                </div>
-            </div>
-
             {% if user.user_is_admin %}
             <div class="panel panel-default">
                 <div class="panel-heading"><a href="{% url 'accounts_user_list' %}">Users</a></div>

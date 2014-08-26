@@ -1,9 +1,0 @@
-{% extends 'base.html' %}
-
-{% block content %}
-    <h1>Delete Role?</h1>
-    <form action="" method="post">{% csrf_token %}
-        <p>Are you sure you want to delete the role {{ object }}?</p>
-        <input type="submit" value="Yes, I'm Sure." class="btn btn-danger"/>
-    </form>
-{% endblock content %}

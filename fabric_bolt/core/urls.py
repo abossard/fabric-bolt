@@ -16,7 +16,6 @@ urlpatterns = patterns(
     url(r'^', include('fabric_bolt.accounts.urls')),
     url(r'^$', views.Dashboard.as_view(), name='index'),
     url(r'^hosts/', include('fabric_bolt.hosts.urls')),
-    url(r'^roles/', include('fabric_bolt.roles.urls')),
     url(r'^web-hooks/', include('fabric_bolt.web_hooks.urls')),
     url(r'^launch-window/', include('fabric_bolt.launch_window.urls')),
     url(r'^fabfiles/', include('fabric_bolt.fabfiles.urls')),

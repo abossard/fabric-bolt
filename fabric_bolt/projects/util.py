@@ -209,12 +209,6 @@ def build_command(deployment, session, abort_on_prompts=True):
 
     task_args = list(set(task_args + task_details[2]))
 
-    project_roles = deployment.stage.project.roles.values_list('name', flat=True)
-    stage_roles = deployment.stage.roles.values_list('name', flat=True)
-    roles = project_roles | stage_roles
-    if roles:
-        command += (' t:' + ','.join(roles) + ' ')
-
     command += deployment.task.name
     if task_args:
         key_value_strings = []
