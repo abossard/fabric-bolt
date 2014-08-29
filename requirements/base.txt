@@ -18,3 +18,4 @@ virtualenv>=1.11.6,<1.12
 python-social-auth>=0.1.26,<0.2.0
 django-graphos==0.0.2a0
 django-activeurl>=0.1.8,<0.2
+requests==2.3.0

@@ -25,6 +25,7 @@ install_requires = [
     'django-graphos==0.0.2a0',
     'django-activeurl>=0.1.8,<0.2',
     'django-authtools>=1.0.0',
+    'requests',
 ]
 
 dev_requires = [
