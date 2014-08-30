@@ -5,6 +5,7 @@ Views for the Projects App
 import datetime
 import subprocess
 import sys
+from copy import deepcopy
 
 from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.db.models.aggregates import Count
@@ -23,7 +24,6 @@ from fabric_bolt.hosts.models import Host
 from fabric_bolt.projects import forms, tables, models
 from fabric_bolt.projects.util import get_fabric_tasks, build_command, get_task_details
 from fabric_bolt.web_hooks.tables import HookTable
-
 from fabric_bolt.projects.signals import deployment_finished
 from copy import deepcopy
 
