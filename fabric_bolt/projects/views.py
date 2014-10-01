@@ -602,8 +602,7 @@ class ProjectStageTasksAjax(ProjectSubPageMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(ProjectStageTasksAjax, self).get_context_data(**kwargs)
 
-        all_tasks = get_fabric_tasks(self.object.project,
-                                     self.object.project.task_regex)
+        all_tasks = get_fabric_tasks(self.object.project)
         task_names = [x[0] for x in all_tasks]
 
         context['all_tasks'] = task_names
