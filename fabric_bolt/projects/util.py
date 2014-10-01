@@ -38,13 +38,17 @@ def update_project_git(project, cache_dir, repo_dir):
         )
 
 
-def update_project_requirements(project, repo_dir):
+def setup_virtual_env_if_needed(repo_dir):
+    env_dir = os.path.join(repo_dir, 'env')
+    if not os.path.exists(env_dir):
+        os.makedirs(env_dir)
+        create_environment(env_dir)
+
+
+def update_project_requirements(project, repo_dir, activate_loc):
     pip_installs = ' '.join(project.fabfile_requirements.splitlines())
 
-    return subprocess.check_output(
-        'cd {};pip install {}'.format(repo_dir, pip_installs),
-        shell=True
-    )
+    check_output_with_ssh_key('source {} && cd {};pip install {}'.format(activate_loc, repo_dir, pip_installs))
 
 
 def get_fabfile_path(project):
@@ -59,10 +63,12 @@ def get_fabfile_path(project):
         repo_dir = os.path.join(cache_dir, slugify(project.name))
 
         update_project_git(project, cache_dir, repo_dir)
+        setup_virtual_env_if_needed(repo_dir)
+        activate_loc = os.path.join(repo_dir, 'env', 'bin', 'activate')
 
-        update_project_requirements(project, repo_dir)
+        update_project_requirements(project, repo_dir, activate_loc)
 
-        result = os.path.join(repo_dir, 'fabfile.py')
+        result = os.path.join(repo_dir, 'fabfile.py'), activate_loc
         cache.set(cache_key, result, settings.FABRIC_TASK_CACHE_TIMEOUT)
         return result
     else:
@@ -85,18 +91,19 @@ def parse_task_details(name, task_output):
         for arg in arguments_line.split(', '):
             m = re.match(r"^([^=]+)(=(\'?)([^']*)\3)?$", arg)
 
-            if m.group(2): # found argument with default value
-                if m.group(3) == "'": # default value is a string
+            if m.group(2):  # found argument with default value
+                if m.group(3) == "'":  # default value is a string
                     arguments.append((m.group(1), m.group(4)))
-                else:
-                    # found an argument with some other default value.
+                else:  # found an argument with some other default value.
                     # all fab arguments are translated to strings, so this doesnt make sense. Ignore the default.
-                    arguments.append((m.group(1), ''))
+                    arguments.append(m.group(1))
             else:
                 arguments.append(m.group(1))
+
     return name, docstring, arguments
 
-def get_fabric_tasks(project, task_regex=None):
+
+def get_fabric_tasks(project):
     """
     Generate a list of fabric tasks that are available
     """
@@ -108,25 +115,31 @@ def get_fabric_tasks(project, task_regex=None):
         return cached_result
 
     try:
-        fabfile_path = get_fabfile_path(project)
+        fabfile_path, activate_loc = get_fabfile_path(project)
 
-        output = subprocess.check_output(['fab', '--list', '--list-format=short', '--fabfile={}'.format(fabfile_path)])
+        if activate_loc:
+            output = subprocess.check_output('source {};fab --list --list-format=short --fabfile={}'.format(activate_loc, fabfile_path), shell=True)
+        else:
+            output = subprocess.check_output(['fab', '--list', '--list-format=short', '--fabfile={}'.format(fabfile_path)])
 
         lines = output.splitlines()
         tasks = []
         for line in lines:
             name = line.strip()
-            if task_regex:
-                if not re.match(task_regex, name):
-                    continue
-            o = subprocess.check_output(
-                ['fab', '--display={}'.format(name), '--fabfile={}'.format(fabfile_path)]
-            )
+            if activate_loc:
+                o = subprocess.check_output(
+                    'source {};fab --display={} --fabfile={}'.format(activate_loc, name, fabfile_path),
+                    shell=True
+                )
+            else:
+                o = subprocess.check_output(
+                    ['fab', '--display={}'.format(name), '--fabfile={}'.format(fabfile_path)]
+                )
+
             tasks.append(parse_task_details(name, o))
 
         cache.set(cache_key, tasks, settings.FABRIC_TASK_CACHE_TIMEOUT)
     except Exception as e:
-        print e
         tasks = []
 
     return tasks
@@ -203,21 +216,15 @@ def build_command(deployment, session, abort_on_prompts=True):
     # Special ones get set a different way
     special_task_configs = list(set(task_configs) & set(command_to_config.keys()))
 
-    command = 'fab '
+    command = 'fab ' + deployment.task.name
 
     task_details = get_task_details(deployment.stage.project, deployment.task.name)
 
-    task_args = list(set(task_args + task_details[2]))
+    task_args = list(set(task_args + [x[0] if isinstance(x, tuple) else x for x in task_details[2]]))
 
-    command += deployment.task.name
     if task_args:
         key_value_strings = []
-        for key_ in task_args:
-            if isinstance(key_, tuple):
-                key = key_[0]
-            else:
-                key = key_
-
+        for key in task_args:
             if key in configs:
                 value = unicode(configs[key].get_value())
             elif key in arg_values:
@@ -248,8 +255,10 @@ def build_command(deployment, session, abort_on_prompts=True):
     if hosts:
         command += ' --hosts=' + ','.join(hosts)
 
-    fabfile_path = get_fabfile_path(deployment.stage.project)
+    fabfile_path, active_loc = get_fabfile_path(deployment.stage.project)
     command += ' --fabfile={}'.format(fabfile_path)
 
-    print command
-    return command
+    if active_loc:
+        return 'source {};'.format(active_loc) + ' ' + command
+    else:
+        return command

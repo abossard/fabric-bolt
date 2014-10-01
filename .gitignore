@@ -64,7 +64,9 @@ worthwhile_fabfile.py
 core.db
 .repo_caches
 .django_cache
-/env
-build
-dist
-fabric_bolt.egg-info
+
+# Distribution / Packaging #
+###############################
+build/
+dist/
+*.egg-info/

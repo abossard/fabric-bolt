@@ -32,6 +32,8 @@ ROOT_URLCONF = 'fabric_bolt.core.urls'
 
 ########## GENERAL CONFIGURATION
 
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -166,7 +168,6 @@ INSTALLED_APPS = (
     # 3rd Party
     'djangocms_admin_style',
     'django.contrib.admin',
-    'south',
     'sekizai',
     'crispy_forms',
     'stronghold',

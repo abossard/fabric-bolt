@@ -93,7 +93,7 @@ def get_payload(deployment):
         "event_name": "deployment_create",
         "id": deployment.pk,
 
-        "url": reverse('projects_deployment_detail', args=(deployment.pk,)),
+        "url": reverse('projects_deployment_detail', args=(deployment.stage.project.pk, deployment.stage.pk, deployment.pk,)),
         "status": deployment.status,
         "task": {
             "name": deployment.task.name

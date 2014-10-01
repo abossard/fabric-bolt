@@ -10,14 +10,12 @@ from fabric_bolt.projects import models
 
 class ProjectCreateForm(forms.ModelForm):
 
-    type = forms.ModelChoiceField(models.ProjectType.objects.all(), empty_label=None)
     button_prefix = "Create"
 
     class Meta:
         model = models.Project
         fields = [
             'name',
-            'type',
             'description',
             'use_repo_fabfile',
             'repo_url',
@@ -29,7 +27,6 @@ class ProjectCreateForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'name',
-            'type',
             'description',
             'task_regex',
             'use_repo_fabfile',
